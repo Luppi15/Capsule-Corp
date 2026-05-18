@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Batch Image Processor · 1280×720</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600;9..144,800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+  :root {
+    --bg: #0e0e0c;
+    --bg-soft: #16161330;
+    --paper: #f3eee3;
+    --ink: #1a1a17;
+    --muted: #8a8678;
+    --accent: #ff5b1f;
+    --accent-soft: #ff5b1f22;
+    --line: #2a2925;
+    --line-paper: #d8d2c4;
+    --success: #6ee7b7;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--paper);
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 14px;
+    line-height: 1.55;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 15% 10%, #ff5b1f15 0, transparent 40%),
+      radial-gradient(circle at 85% 90%, #6ee7b710 0, transparent 40%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.08 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .shell {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 28px 80px;
+  }
+
+  /* ============ TOP BAR ============ */
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 14px;
+    margin-bottom: 36px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+  }
+
+  .topbar .pulse {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    margin-right: 8px;
+    animation: pulse 2s infinite;
+    vertical-align: middle;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 var(--accent-soft); }
+    50% { opacity: 0.6; box-shadow: 0 0 0 6px transparent; }
+  }
+
+  /* ============ HEADER ============ */
+  header {
+    margin-bottom: 48px;
+  }
+
+  .label-tag {
+    display: inline-block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: clamp(48px, 8vw, 96px);
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+    color: var(--paper);
+    margin-bottom: 20px;
+  }
+
+  h1 em {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--accent);
+  }
+
+  .lead {
+    max-width: 580px;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  /* ============ CARD GRID ============ */
+  .grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+
+  @media (max-width: 860px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: var(--paper);
+    color: var(--ink);
+    border-radius: 4px;
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    border-bottom: 1px solid var(--line-paper);
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+  }
+
+  /* ============ DROPZONE ============ */
+  .dropzone {
+    border: 2px dashed var(--line-paper);
+    border-radius: 4px;
+    padding: 48px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    background:
+      linear-gradient(45deg, transparent 48%, #00000005 50%, transparent 52%),
+      var(--paper);
+    background-size: 8px 8px, auto;
+  }
+
+  .dropzone:hover, .dropzone.dragover {
+    border-color: var(--accent);
+    background-color: var(--accent-soft);
+    transform: translateY(-1px);
+  }
+
+  .dropzone.dragover {
+    border-style: solid;
+  }
+
+  .dz-icon {
+    display: inline-block;
+    width: 64px;
+    height: 64px;
+    border: 1px solid var(--ink);
+    border-radius: 50%;
+    position: relative;
+    margin-bottom: 20px;
+    transition: transform 0.3s;
+  }
+
+  .dropzone:hover .dz-icon { transform: rotate(90deg); }
+
+  .dz-icon::before, .dz-icon::after {
+    content: '';
+    position: absolute;
+    background: var(--ink);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  .dz-icon::before { width: 22px; height: 1.5px; }
+  .dz-icon::after { width: 1.5px; height: 22px; }
+
+  .dz-title {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+  }
+
+  .dz-sub {
+    color: var(--muted);
+    font-size: 12px;
+    letter-spacing: 0.05em;
+  }
+
+  .dz-sub strong {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  /* ============ CONTROLS PANEL ============ */
+  .controls {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .field { display: flex; flex-direction: column; gap: 8px; }
+
+  .field-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .field-label .optional {
+    font-style: italic;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--muted);
+    opacity: 0.7;
+  }
+
+  input[type="number"] {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--line-paper);
+    padding: 10px 0;
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+
+  input[type="number"]:focus {
+    border-bottom-color: var(--accent);
+  }
+
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+  .spec-list {
+    list-style: none;
+    font-size: 12px;
+    color: var(--ink);
+  }
+
+  .spec-list li {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px dotted var(--line-paper);
+  }
+
+  .spec-list li:last-child { border-bottom: none; }
+  .spec-list .v { color: var(--muted); }
+
+  /* ============ BUTTON ============ */
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+
+  .btn-primary {
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    padding: 18px 28px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    cursor: pointer;
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.15s ease, background 0.2s;
+    flex: 1;
+    min-width: 220px;
+  }
+
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    transform: translateX(-101%);
+    transition: transform 0.3s ease;
+  }
+
+  .btn-primary span {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .btn-primary:hover:not(:disabled)::before { transform: translateX(0); }
+  .btn-primary:active:not(:disabled) { transform: translateY(1px); }
+
+  .btn-primary:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .btn-secondary {
+    background: transparent;
+    border: 1px solid var(--line-paper);
+    color: var(--ink);
+    padding: 18px 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.2s;
+  }
+
+  .btn-secondary:hover { border-color: var(--ink); background: var(--ink); color: var(--paper); }
+
+  /* ============ FILE LIST ============ */
+  .file-list-wrap {
+    margin-top: 32px;
+    background: var(--paper);
+    color: var(--ink);
+    border-radius: 4px;
+    overflow: hidden;
+    display: none;
+  }
+
+  .file-list-wrap.visible { display: block; }
+
+  .flw-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 22px 28px 14px;
+    border-bottom: 1px solid var(--line-paper);
+  }
+
+  .flw-header h3 {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: 20px;
+    letter-spacing: -0.02em;
+  }
+
+  .flw-header .count {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+  }
+
+  .file-list {
+    max-height: 400px;
+    overflow-y: auto;
+    list-style: none;
+  }
+
+  .file-list::-webkit-scrollbar { width: 6px; }
+  .file-list::-webkit-scrollbar-thumb { background: var(--line-paper); border-radius: 3px; }
+
+  .file-row {
+    display: grid;
+    grid-template-columns: 40px 1fr 1fr 80px;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 28px;
+    border-bottom: 1px solid var(--line-paper);
+    font-size: 12px;
+    animation: fadeRow 0.3s ease both;
+  }
+
+  @keyframes fadeRow {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .file-row:last-child { border-bottom: none; }
+
+  .file-idx {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .file-original {
+    color: var(--muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .file-new {
+    color: var(--ink);
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .file-status {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-align: right;
+  }
+
+  .file-status.done { color: #1f7a3f; }
+  .file-status.processing { color: var(--accent); }
+  .file-status.error { color: #c0392b; }
+
+  /* ============ STATUS BAR ============ */
+  .status-bar {
+    margin-top: 20px;
+    padding: 14px 20px;
+    background: var(--bg-soft);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    display: none;
+    align-items: center;
+    gap: 16px;
+    font-size: 12px;
+  }
+
+  .status-bar.visible { display: flex; }
+
+  .progress-track {
+    flex: 1;
+    height: 4px;
+    background: var(--line);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    width: 0%;
+    transition: width 0.3s ease;
+  }
+
+  .status-text {
+    color: var(--muted);
+    min-width: 100px;
+    text-align: right;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* ============ FOOTER ============ */
+  footer {
+    margin-top: 60px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+  }
+
+  footer .ascii {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent);
+    opacity: 0.7;
+  }
+
+  @media (max-width: 600px) {
+    .file-row {
+      grid-template-columns: 30px 1fr 60px;
+      font-size: 11px;
+    }
+    .file-original { display: none; }
+    .shell { padding: 20px 16px 60px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div><span class="pulse"></span>System Ready · v1.0</div>
+    <div>1280 × 720 · BATCH · LOCAL</div>
+  </div>
+
+  <!-- HEADER -->
+  <header>
+    <div class="label-tag">// processor.batch.image</div>
+    <h1>Redimensione,<br>renomeie, <em>baixe.</em></h1>
+    <p class="lead">
+      Uma ferramenta no navegador para processamento de imagens em lote.
+      Tudo acontece localmente — nenhum byte sai do seu dispositivo.
+      Arraste seus arquivos, defina suas regras, e receba um ZIP organizado.
+    </p>
+  </header>
+
+  <!-- MAIN GRID -->
+  <div class="grid">
+
+    <!-- DROPZONE CARD -->
+    <div class="card">
+      <div class="card-header">
+        <span>01 · Upload</span>
+        <span>Drag & Drop</span>
+      </div>
+      <label class="dropzone" id="dropzone" for="fileInput">
+        <span class="dz-icon"></span>
+        <div class="dz-title">Solte suas imagens aqui</div>
+        <div class="dz-sub">ou <strong>clique para selecionar</strong> · JPG, PNG, WEBP</div>
+        <input type="file" id="fileInput" accept="image/*" multiple hidden>
+      </label>
+    </div>
+
+    <!-- CONTROLS CARD -->
+    <div class="card">
+      <div class="card-header">
+        <span>02 · Parâmetros</span>
+        <span>Config</span>
+      </div>
+
+      <div class="controls">
+        <div class="field">
+          <label class="field-label" for="batchSize">
+            <span>Quantidade por lote</span>
+            <span class="optional">opcional</span>
+          </label>
+          <input type="number" id="batchSize" placeholder="Todas" min="1">
+        </div>
+
+        <ul class="spec-list">
+          <li><span>Dimensão final</span><span class="v">1280 × 720 px</span></li>
+          <li><span>Prefixo</span><span class="v">1, 2, 3...</span></li>
+          <li><span>Sufixo numérico</span><span class="v">removido</span></li>
+          <li><span>Saída</span><span class="v">.zip</span></li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="actions">
+    <button class="btn-primary" id="processBtn" disabled>
+      <span>
+        Processar e Baixar Imagens
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M3 17v2a2 2 0 002 2h14a2 2 0 002-2v-2"/></svg>
+      </span>
+    </button>
+    <button class="btn-secondary" id="clearBtn">Limpar Fila</button>
+  </div>
+
+  <!-- STATUS -->
+  <div class="status-bar" id="statusBar">
+    <span class="status-text" id="statusLabel">Processando...</span>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <span class="status-text" id="statusCount">0 / 0</span>
+  </div>
+
+  <!-- FILE LIST -->
+  <div class="file-list-wrap" id="fileListWrap">
+    <div class="flw-header">
+      <h3>Fila de processamento</h3>
+      <span class="count" id="fileCount">0 arquivos</span>
+    </div>
+    <ul class="file-list" id="fileList"></ul>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div>Built with HTML · CSS · JS</div>
+    <div class="ascii">[ ◉ — ◉ — ◉ ]</div>
+    <div>JSZip · Canvas API</div>
+  </footer>
+
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  // ===== STATE =====
+  const state = {
+    files: [],   // Array<File> em ordem de seleção
+  };
+
+  // ===== DOM =====
+  const dropzone     = document.getElementById('dropzone');
+  const fileInput    = document.getElementById('fileInput');
+  const batchSize    = document.getElementById('batchSize');
+  const processBtn   = document.getElementById('processBtn');
+  const clearBtn     = document.getElementById('clearBtn');
+  const fileListWrap = document.getElementById('fileListWrap');
+  const fileList     = document.getElementById('fileList');
+  const fileCount    = document.getElementById('fileCount');
+  const statusBar    = document.getElementById('statusBar');
+  const statusLabel  = document.getElementById('statusLabel');
+  const statusCount  = document.getElementById('statusCount');
+  const progressFill = document.getElementById('progressFill');
+
+  // ===== HELPERS =====
+
+  /**
+   * Aplica a regra de renomeação:
+   *  1) Remove o sufixo numérico final (ex.: _202605172301)
+   *  2) Substitui underlines restantes por espaços
+   *  3) Adiciona o índice sequencial como prefixo
+   */
+  function renameFile(originalName, index) {
+    // Separa extensão
+    const lastDot = originalName.lastIndexOf('.');
+    let base = lastDot > 0 ? originalName.slice(0, lastDot) : originalName;
+    const ext  = lastDot > 0 ? originalName.slice(lastDot) : '';
+
+    // 1) Remove sufixo numérico final (com ou sem separador _, -, espaço)
+    //    Captura padrões como: _202605172301, -123456, 20250101, etc.
+    base = base.replace(/[_\-\s]?\d{4,}$/g, '');
+
+    // 2) Substitui underlines restantes por espaços
+    base = base.replace(/_/g, ' ').trim();
+
+    // 3) Prefixo sequencial
+    return `${index} ${base}${ext}`;
+  }
+
+  /**
+   * Redimensiona uma File para 1280x720 usando Canvas e retorna Blob (JPEG).
+   */
+  function resizeImage(file) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width  = 1280;
+        canvas.height = 720;
+        const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+
+        // Fundo branco (caso a imagem seja PNG transparente)
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, 1280, 720);
+
+        // Stretch exato para 1280x720 (conforme especificação)
+        ctx.drawImage(img, 0, 0, 1280, 720);
+
+        URL.revokeObjectURL(url);
+
+        canvas.toBlob((blob) => {
+          if (blob) resolve(blob);
+          else reject(new Error('Falha ao gerar blob'));
+        }, 'image/jpeg', 0.92);
+      };
+
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        reject(new Error('Falha ao carregar imagem: ' + file.name));
+      };
+
+      img.src = url;
+    });
+  }
+
+  /**
+   * Trata a extensão final — todas as imagens serão salvas como .jpg
+   * por uniformidade, já que o canvas exporta em JPEG.
+   */
+  function ensureJpgExtension(name) {
+    return name.replace(/\.(jpe?g|png|webp|gif|bmp)$/i, '.jpg');
+  }
+
+  // ===== UI UPDATES =====
+
+  function updateFileList() {
+    const limit = parseInt(batchSize.value, 10);
+    const effective = (!isNaN(limit) && limit > 0) ? Math.min(limit, state.files.length) : state.files.length;
+
+    fileList.innerHTML = '';
+    state.files.forEach((file, i) => {
+      const willProcess = i < effective;
+      const newName = ensureJpgExtension(renameFile(file.name, i + 1));
+
+      const li = document.createElement('li');
+      li.className = 'file-row';
+      li.dataset.idx = i;
+      li.style.opacity = willProcess ? '1' : '0.35';
+      li.innerHTML = `
+        <div class="file-idx">${String(i + 1).padStart(2, '0')}</div>
+        <div class="file-original" title="${escapeHtml(file.name)}">${escapeHtml(file.name)}</div>
+        <div class="file-new" title="${escapeHtml(newName)}">→ ${escapeHtml(newName)}</div>
+        <div class="file-status" data-status>${willProcess ? 'aguardando' : 'fora do lote'}</div>
+      `;
+      fileList.appendChild(li);
+    });
+
+    fileCount.textContent = `${state.files.length} arquivo${state.files.length !== 1 ? 's' : ''} · ${effective} no lote`;
+    fileListWrap.classList.toggle('visible', state.files.length > 0);
+    processBtn.disabled = state.files.length === 0;
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function setRowStatus(idx, status, cls) {
+    const row = fileList.querySelector(`.file-row[data-idx="${idx}"] [data-status]`);
+    if (row) {
+      row.textContent = status;
+      row.className = 'file-status ' + (cls || '');
+    }
+  }
+
+  function setProgress(done, total, label) {
+    statusBar.classList.add('visible');
+    progressFill.style.width = total ? `${(done / total) * 100}%` : '0%';
+    statusCount.textContent = `${done} / ${total}`;
+    if (label) statusLabel.textContent = label;
+  }
+
+  // ===== FILE INTAKE =====
+
+  function addFiles(fileListIn) {
+    // Mantém ordem de chegada (FileList é iterável)
+    const incoming = Array.from(fileListIn).filter(f => f.type.startsWith('image/'));
+    if (incoming.length === 0) return;
+    state.files = state.files.concat(incoming);
+    updateFileList();
+  }
+
+  fileInput.addEventListener('change', (e) => {
+    addFiles(e.target.files);
+    fileInput.value = ''; // permite re-selecionar os mesmos arquivos
+  });
+
+  ['dragenter', 'dragover'].forEach(ev => {
+    dropzone.addEventListener(ev, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.classList.add('dragover');
+    });
+  });
+
+  ['dragleave', 'drop'].forEach(ev => {
+    dropzone.addEventListener(ev, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.classList.remove('dragover');
+    });
+  });
+
+  dropzone.addEventListener('drop', (e) => {
+    const dt = e.dataTransfer;
+    if (dt && dt.files) addFiles(dt.files);
+  });
+
+  batchSize.addEventListener('input', updateFileList);
+
+  clearBtn.addEventListener('click', () => {
+    state.files = [];
+    batchSize.value = '';
+    statusBar.classList.remove('visible');
+    progressFill.style.width = '0%';
+    updateFileList();
+  });
+
+  // ===== PROCESS & DOWNLOAD =====
+
+  processBtn.addEventListener('click', async () => {
+    if (state.files.length === 0) return;
+
+    const limit = parseInt(batchSize.value, 10);
+    const effective = (!isNaN(limit) && limit > 0) ? Math.min(limit, state.files.length) : state.files.length;
+    const filesToProcess = state.files.slice(0, effective);
+
+    processBtn.disabled = true;
+    clearBtn.disabled = true;
+    setProgress(0, filesToProcess.length, 'Processando...');
+
+    const zip = new JSZip();
+    let done = 0;
+
+    for (let i = 0; i < filesToProcess.length; i++) {
+      const file = filesToProcess[i];
+      setRowStatus(i, 'processando', 'processing');
+      try {
+        const blob = await resizeImage(file);
+        const newName = ensureJpgExtension(renameFile(file.name, i + 1));
+        zip.file(newName, blob);
+        setRowStatus(i, 'pronto', 'done');
+      } catch (err) {
+        console.error(err);
+        setRowStatus(i, 'erro', 'error');
+      }
+      done++;
+      setProgress(done, filesToProcess.length, 'Processando...');
+    }
+
+    setProgress(done, filesToProcess.length, 'Compactando ZIP...');
+    const zipBlob = await zip.generateAsync(
+      { type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } },
+      (meta) => {
+        // Atualiza barra durante compactação
+        progressFill.style.width = `${meta.percent}%`;
+      }
+    );
+
+    // Trigger download
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(zipBlob);
+    a.download = `imagens-processadas-${stamp}.zip`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+
+    setProgress(done, filesToProcess.length, 'Concluído ✓');
+    processBtn.disabled = false;
+    clearBtn.disabled = false;
+  });
+
+  // Inicialização
+  updateFileList();
+})();
+</script>
+
+</body>
+</html>

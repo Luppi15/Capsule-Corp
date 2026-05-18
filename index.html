@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Capsule Corp · Batch Image Processor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600;9..144,800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div><span class="pulse"></span>Capsule Corp · v1.0</div>
+    <div>1280 × 720 · BATCH · LOCAL</div>
+  </div>
+
+  <!-- HEADER -->
+  <header>
+    <div class="label-tag">// processor.batch.image</div>
+    <h1>Redimensione,<br>renomeie, <em>baixe.</em></h1>
+    <p class="lead">
+      Uma ferramenta no navegador para processamento de imagens em lote.
+      Tudo acontece localmente — nenhum byte sai do seu dispositivo.
+      Arraste seus arquivos, defina suas regras, e receba um ZIP organizado.
+    </p>
+  </header>
+
+  <!-- UPLOAD CARD -->
+  <div class="card">
+    <div class="card-header">
+      <span>01 · Upload</span>
+      <span>Drag & Drop</span>
+    </div>
+    <label class="dropzone" id="dropzone" for="fileInput">
+      <span class="dz-icon"></span>
+      <div class="dz-title">Solte suas imagens aqui</div>
+      <div class="dz-sub">ou <strong>clique para selecionar</strong> · JPG, PNG, WEBP</div>
+      <input type="file" id="fileInput" accept="image/*" multiple hidden>
+    </label>
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="actions">
+    <button class="btn-primary" id="processBtn" disabled>
+      <span>
+        Processar e Baixar Imagens
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M3 17v2a2 2 0 002 2h14a2 2 0 002-2v-2"/></svg>
+      </span>
+    </button>
+    <button class="btn-secondary" id="clearBtn">Limpar Fila</button>
+  </div>
+
+  <!-- STATUS -->
+  <div class="status-bar" id="statusBar">
+    <span class="status-text" id="statusLabel">Processando...</span>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <span class="status-text" id="statusCount">0 / 0</span>
+  </div>
+
+  <!-- FILE LIST -->
+  <div class="file-list-wrap" id="fileListWrap">
+    <div class="flw-header">
+      <h3>Fila de processamento</h3>
+      <span class="count" id="fileCount">0 arquivos</span>
+    </div>
+    <ul class="file-list" id="fileList"></ul>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div>Capsule Corp · HTML · CSS · JS</div>
+    <div class="ascii">[ ◉ — ◉ — ◉ ]</div>
+    <div>JSZip · Canvas API</div>
+  </footer>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
