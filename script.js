@@ -34,8 +34,16 @@
   function extractBase(originalName) {
     const lastDot = originalName.lastIndexOf('.');
     let base = lastDot > 0 ? originalName.slice(0, lastDot) : originalName;
+    // 1) Remove sufixo de cópia do Windows: " (1)", " (2)", etc.
+    base = base.replace(/\s*\(\d+\)$/g, '');
+    // 2) Remove sufixo numérico final (ex.: _202605172301)
     base = base.replace(/[_\-\s]?\d{4,}$/g, '');
-    base = base.replace(/_/g, ' ').trim();
+    // 3) Substitui underlines por espaços
+    base = base.replace(/_/g, ' ');
+    // 4) Remove pontos e reticências (… e ...) — a extensão já foi separada antes
+    base = base.replace(/[.…]+/g, ' ');
+    // 5) Limpa espaços múltiplos
+    base = base.replace(/\s+/g, ' ').trim();
     return base;
   }
 
