@@ -4,9 +4,9 @@
   --paper: #f3eee3;
   --ink: #1a1a17;
   --muted: #8a8678;
-  --accent: #ff5b1f;
-  --accent-soft: #ff5b1f22;
-  --line: #2a2925;
+  --accent: #4d82a8;
+  --accent-soft: #4d82a822;
+  --line: #1e2a33;
   --line-paper: #d8d2c4;
   --success: #6ee7b7;
 }
@@ -28,8 +28,8 @@ body::before {
   position: fixed;
   inset: 0;
   background-image:
-    radial-gradient(circle at 15% 10%, #ff5b1f15 0, transparent 40%),
-    radial-gradient(circle at 85% 90%, #6ee7b710 0, transparent 40%);
+    radial-gradient(circle at 15% 10%, #4d82a812 0, transparent 40%),
+    radial-gradient(circle at 85% 90%, #4d82a808 0, transparent 40%);
   pointer-events: none;
   z-index: 0;
 }
@@ -65,20 +65,36 @@ body::after {
   color: var(--muted);
 }
 
+.topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-logo {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  opacity: 0.9;
+  transition: opacity 0.2s;
+}
+
+.brand-logo:hover { opacity: 1; }
+
 .topbar .pulse {
   display: inline-block;
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   background: var(--accent);
   border-radius: 50%;
-  margin-right: 8px;
   animation: pulse 2s infinite;
   vertical-align: middle;
+  flex-shrink: 0;
 }
 
 @keyframes pulse {
   0%, 100% { opacity: 1; box-shadow: 0 0 0 0 var(--accent-soft); }
-  50% { opacity: 0.6; box-shadow: 0 0 0 6px transparent; }
+  50% { opacity: 0.6; box-shadow: 0 0 0 5px transparent; }
 }
 
 /* ============ HEADER ============ */
