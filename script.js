@@ -7,7 +7,7 @@
   };
 
   // ===== CONFIG (valores fixos) =====
-  const TARGET_W    = 1280;
+  let TARGET_W    = 1280;
   const TARGET_H    = 720;
 
   // ===== DOM =====
@@ -15,6 +15,8 @@
   const fileInput    = document.getElementById('fileInput');
   const processBtn   = document.getElementById('processBtn');
   const clearBtn     = document.getElementById('clearBtn');
+  const resCheckbox  = document.getElementById('resCheckbox');
+  const topbarInfo   = document.getElementById('topbarInfo');
   const fileListWrap = document.getElementById('fileListWrap');
   const fileList     = document.getElementById('fileList');
   const fileCount    = document.getElementById('fileCount');
@@ -328,6 +330,15 @@
     progressFill.style.width = '0%';
     updateFileList();
   });
+
+  if (resCheckbox) {
+    resCheckbox.addEventListener('change', (e) => {
+      TARGET_W = e.target.checked ? 1200 : 1280;
+      if (topbarInfo) {
+        topbarInfo.textContent = `${TARGET_W} × ${TARGET_H} · BATCH · LOCAL`;
+      }
+    });
+  }
 
   // ===== PROCESS & DOWNLOAD =====
 

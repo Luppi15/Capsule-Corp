@@ -287,7 +287,7 @@ h1 em {
 .btn-secondary {
   background: transparent;
   border: 1px solid var(--line-paper);
-  color: var(--ink);
+  color: var(--paper);
   padding: 18px 24px;
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
@@ -298,8 +298,58 @@ h1 em {
   transition: all 0.2s;
 }
 
-.btn-secondary:hover { border-color: var(--ink); background: var(--ink); color: var(--paper); }
+.btn-secondary:hover { border-color: var(--paper); background: var(--paper); color: var(--ink); }
 
+/* ============ CUSTOM CHECKBOX ============ */
+.custom-checkbox {
+  background: transparent;
+  border: 1px solid var(--line-paper);
+  color: var(--paper);
+  padding: 18px 24px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  user-select: none;
+}
+
+.custom-checkbox:hover { 
+  border-color: var(--paper); 
+  background: var(--paper); 
+  color: var(--ink); 
+}
+
+.custom-checkbox input {
+  display: none;
+}
+
+.custom-checkbox .checkmark {
+  width: 14px;
+  height: 14px;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.custom-checkbox input:checked + .checkmark::after {
+  content: '';
+  position: absolute;
+  width: 4px;
+  height: 8px;
+  border: solid currentColor;
+  border-width: 0 1.5px 1.5px 0;
+  transform: rotate(45deg);
+  margin-bottom: 2px;
+}
 /* ============ FILE LIST ============ */
 .file-list-wrap {
   margin-top: 32px;
