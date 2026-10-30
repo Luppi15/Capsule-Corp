@@ -6,17 +6,22 @@
     files: [],   // Array<File> em ordem de seleção
   };
 
-  // ===== CONFIG (valores fixos) =====
-  let TARGET_W    = 1280;
-  const TARGET_H    = 720;
+  // ===== CONFIG (dimensões alvo) =====
+  let TARGET_W       = 1280;
+  let TARGET_H       = 720;
 
   // ===== DOM =====
-  const dropzone     = document.getElementById('dropzone');
-  const fileInput    = document.getElementById('fileInput');
-  const processBtn   = document.getElementById('processBtn');
-  const clearBtn     = document.getElementById('clearBtn');
-  const resCheckbox  = document.getElementById('resCheckbox');
-  const topbarInfo   = document.getElementById('topbarInfo');
+  const dropzone         = document.getElementById('dropzone');
+  const fileInput        = document.getElementById('fileInput');
+  const processBtn       = document.getElementById('processBtn');
+  const clearBtn         = document.getElementById('clearBtn');
+  const resRadios        = document.querySelectorAll('input[name="resMode"]');
+  const customRadio      = document.getElementById('customRadio');
+  const customInputsWrap = document.getElementById('customInputsWrap');
+  const customW          = document.getElementById('customW');
+  const customH          = document.getElementById('customH');
+  const resBadge         = document.getElementById('resBadge');
+  const topbarInfo       = document.getElementById('topbarInfo');
   const fileListWrap = document.getElementById('fileListWrap');
   const fileList     = document.getElementById('fileList');
   const fileCount    = document.getElementById('fileCount');
@@ -331,11 +336,84 @@
     updateFileList();
   });
 
-  if (resCheckbox) {
-    resCheckbox.addEventListener('change', (e) => {
-      TARGET_W = e.target.checked ? 1200 : 1280;
-      if (topbarInfo) {
-        topbarInfo.textContent = `${TARGET_W} × ${TARGET_H} · BATCH · LOCAL`;
+  // ===== CONTROLE DE DIMENSÕES / RESOLUÇÃO =====
+
+  function updateResolutionDisplay() {
+    const text = `${TARGET_W} × ${TARGET_H}`;
+    if (topbarInfo) {
+      topbarInfo.textContent = `${text} · BATCH · LOCAL`;
+    }
+    if (resBadge) {
+      resBadge.textContent = `${text} PX`;
+    }
+  }
+
+  function applyResolutionMode() {
+    const selected = document.querySelector('input[name="resMode"]:checked')?.value || '1280x720';
+
+    if (selected === '1280x720') {
+      TARGET_W = 1280;
+      TARGET_H = 720;
+      if (customInputsWrap) customInputsWrap.classList.remove('visible');
+    } else if (selected === '1200x720') {
+      TARGET_W = 1200;
+      TARGET_H = 720;
+      if (customInputsWrap) customInputsWrap.classList.remove('visible');
+    } else if (selected === 'custom') {
+      if (customInputsWrap) customInputsWrap.classList.add('visible');
+      const w = parseInt(customW?.value, 10);
+      const h = parseInt(customH?.value, 10);
+      TARGET_W = (w && w > 0) ? w : 1280;
+      TARGET_H = (h && h > 0) ? h : 720;
+    }
+
+    updateResolutionDisplay();
+  }
+
+  resRadios.forEach(radio => {
+    radio.addEventListener('change', () => {
+      applyResolutionMode();
+      if (radio.value === 'custom' && customW) {
+        customW.focus();
+        customW.select();
+      }
+    });
+  });
+
+  function handleCustomInputChange() {
+    if (customRadio && !customRadio.checked) {
+      customRadio.checked = true;
+      if (customInputsWrap) customInputsWrap.classList.add('visible');
+    }
+
+    const w = parseInt(customW?.value, 10);
+    const h = parseInt(customH?.value, 10);
+
+    if (w && w > 0) {
+      TARGET_W = Math.min(Math.max(w, 1), 16384);
+    }
+    if (h && h > 0) {
+      TARGET_H = Math.min(Math.max(h, 1), 16384);
+    }
+
+    updateResolutionDisplay();
+  }
+
+  if (customW && customH) {
+    ['input', 'change'].forEach(ev => {
+      customW.addEventListener(ev, handleCustomInputChange);
+      customH.addEventListener(ev, handleCustomInputChange);
+    });
+
+    customW.addEventListener('blur', () => {
+      if (!customW.value || parseInt(customW.value, 10) < 1) {
+        customW.value = TARGET_W || 1280;
+      }
+    });
+
+    customH.addEventListener('blur', () => {
+      if (!customH.value || parseInt(customH.value, 10) < 1) {
+        customH.value = TARGET_H || 720;
       }
     });
   }
@@ -412,5 +490,6 @@
   });
 
   // Inicialização
+  applyResolutionMode();
   updateFileList();
 })();

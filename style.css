@@ -300,55 +300,184 @@ h1 em {
 
 .btn-secondary:hover { border-color: var(--paper); background: var(--paper); color: var(--ink); }
 
-/* ============ CUSTOM CHECKBOX ============ */
-.custom-checkbox {
-  background: transparent;
-  border: 1px solid var(--line-paper);
-  color: var(--paper);
+/* ============ RESOLUTION PANEL ============ */
+.res-panel {
+  background: #141412;
+  border: 1px solid var(--line);
+  border-radius: 4px;
   padding: 18px 24px;
-  font-family: 'JetBrains Mono', monospace;
+  margin-top: 8px;
+  margin-bottom: 16px;
+  transition: border-color 0.2s ease;
+}
+
+.res-panel:hover {
+  border-color: rgba(77, 130, 168, 0.4);
+}
+
+.res-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(30, 42, 51, 0.7);
+}
+
+.res-panel-tag {
   font-size: 11px;
   text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+}
+
+.res-badge {
+  font-size: 11px;
+  font-weight: 700;
   letter-spacing: 0.15em;
-  cursor: pointer;
+  color: var(--paper);
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  padding: 4px 10px;
   border-radius: 2px;
-  transition: all 0.2s;
+}
+
+.res-panel-body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.res-presets {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.res-option {
+  cursor: pointer;
   user-select: none;
 }
 
-.custom-checkbox:hover { 
-  border-color: var(--paper); 
-  background: var(--paper); 
-  color: var(--ink); 
+.res-option input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
 }
 
-.custom-checkbox input {
-  display: none;
-}
-
-.custom-checkbox .checkmark {
-  width: 14px;
-  height: 14px;
-  border: 1px solid currentColor;
-  border-radius: 2px;
-  display: flex;
+.res-btn {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  position: relative;
+  padding: 10px 18px;
+  border: 1px solid var(--line-paper);
+  border-radius: 2px;
+  color: var(--paper);
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  background: transparent;
+  transition: all 0.2s ease;
 }
 
-.custom-checkbox input:checked + .checkmark::after {
-  content: '';
+.res-option:hover .res-btn {
+  border-color: var(--paper);
+  background: rgba(243, 238, 227, 0.08);
+}
+
+.res-option input[type="radio"]:checked + .res-btn {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 0 10px rgba(77, 130, 168, 0.25);
+}
+
+.custom-inputs-wrap {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--line);
+  padding: 6px 14px;
+  border-radius: 3px;
+  animation: fadeIn 0.2s ease;
+}
+
+.custom-inputs-wrap.visible {
+  display: flex;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.custom-input-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.custom-input-group label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.custom-input-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.custom-input-field input {
+  width: 86px;
+  background: #0e0e0c;
+  border: 1px solid var(--line);
+  color: var(--paper);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  padding: 6px 26px 6px 10px;
+  border-radius: 2px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.custom-input-field input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+.custom-input-field input::-webkit-inner-spin-button,
+.custom-input-field input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.custom-input-field input[type=number] {
+  -moz-appearance: textfield;
+}
+
+.custom-unit {
   position: absolute;
-  width: 4px;
-  height: 8px;
-  border: solid currentColor;
-  border-width: 0 1.5px 1.5px 0;
-  transform: rotate(45deg);
-  margin-bottom: 2px;
+  right: 7px;
+  font-size: 10px;
+  color: var(--muted);
+  pointer-events: none;
+  text-transform: uppercase;
+}
+
+.custom-multiply {
+  color: var(--muted);
+  font-size: 14px;
+  user-select: none;
 }
 /* ============ FILE LIST ============ */
 .file-list-wrap {
@@ -510,4 +639,28 @@ footer .ascii {
   }
   .file-original { display: none; }
   .shell { padding: 20px 16px 60px; }
+
+  .res-panel-body {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .res-presets {
+    width: 100%;
+  }
+  .res-option {
+    flex: 1;
+  }
+  .res-btn {
+    width: 100%;
+    text-align: center;
+    padding: 10px 8px;
+    font-size: 10px;
+  }
+  .custom-inputs-wrap {
+    width: 100%;
+    justify-content: center;
+  }
+  .custom-input-field input {
+    width: 78px;
+  }
 }

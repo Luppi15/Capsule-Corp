@@ -1,4 +1,4 @@
-const CACHE = 'capsule-corp-v1';
+const CACHE = 'capsule-corp-v2';
 
 const ASSETS = [
   '/Capsule-Corp/',

@@ -64,6 +64,49 @@
     </label>
   </div>
 
+  <!-- RESOLUTION SETTINGS -->
+  <div class="res-panel">
+    <div class="res-panel-header">
+      <span class="res-panel-tag">// 02 · Dimensões de Saída</span>
+      <span class="res-badge" id="resBadge">1280 × 720 PX</span>
+    </div>
+
+    <div class="res-panel-body">
+      <div class="res-presets" role="radiogroup" aria-label="Opções de dimensão da imagem">
+        <label class="res-option" title="Resolução padrão 1280x720">
+          <input type="radio" name="resMode" value="1280x720" checked>
+          <span class="res-btn">1280 × 720</span>
+        </label>
+        <label class="res-option" title="Resolução 1200x720">
+          <input type="radio" name="resMode" value="1200x720">
+          <span class="res-btn">1200 × 720</span>
+        </label>
+        <label class="res-option" title="Definir dimensões personalizadas em pixels">
+          <input type="radio" name="resMode" value="custom" id="customRadio">
+          <span class="res-btn">Personalizado</span>
+        </label>
+      </div>
+
+      <div class="custom-inputs-wrap" id="customInputsWrap">
+        <div class="custom-input-group">
+          <label for="customW">W</label>
+          <div class="custom-input-field">
+            <input type="number" id="customW" min="1" max="10000" step="1" value="1280" placeholder="1280" aria-label="Largura em pixels (W)">
+            <span class="custom-unit">px</span>
+          </div>
+        </div>
+        <span class="custom-multiply">×</span>
+        <div class="custom-input-group">
+          <label for="customH">H</label>
+          <div class="custom-input-field">
+            <input type="number" id="customH" min="1" max="10000" step="1" value="720" placeholder="720" aria-label="Altura em pixels (H)">
+            <span class="custom-unit">px</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ACTIONS -->
   <div class="actions">
     <button class="btn-primary" id="processBtn" disabled>
@@ -72,11 +115,6 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M3 17v2a2 2 0 002 2h14a2 2 0 002-2v-2"/></svg>
       </span>
     </button>
-    <label class="custom-checkbox" title="Alternar para resolução 1200x720">
-      <input type="checkbox" id="resCheckbox">
-      <span class="checkmark"></span>
-      1200x720
-    </label>
     <button class="btn-secondary" id="clearBtn">Limpar Fila</button>
   </div>
 
